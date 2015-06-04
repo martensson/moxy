@@ -3,12 +3,12 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/mailgun/oxy/forward"
 	"github.com/mailgun/oxy/roundrobin"
 	"github.com/mailgun/oxy/testutils"
@@ -46,18 +46,12 @@ func callbackworker() {
 			select {
 			case <-ticker.C:
 				<-callbackqueue
-				status := "config reloaded."
 				err := config()
 				if err != nil {
-					status = err.Error()
+					log.Println(err.Error())
+				} else {
+					log.Println("config updated from Marathon")
 				}
-				entry := logrus.WithFields(logrus.Fields{
-					"status": status,
-				})
-				entry.Logger.Out = os.Stdout
-				// uncomment for json logging.
-				//entry.Logger.Formatter = &logrus.JSONFormatter{}
-				entry.Info("reload")
 			}
 		}
 	}()
@@ -91,13 +85,15 @@ func config() error {
 			}
 		}
 		if s, ok := apps[v.AppId[1:]]; ok {
-			s.lb.UpsertServer(testutils.ParseURI("http://" + v.Host + ":" + strconv.FormatInt(v.Ports[0], 10)))
+			s.Lb.UpsertServer(testutils.ParseURI("http://" + v.Host + ":" + strconv.FormatInt(v.Ports[0], 10)))
+			s.Tasks = append(s.Tasks, v.Host+":"+strconv.FormatInt(v.Ports[0], 10))
 			apps[v.AppId[1:]] = s
 		} else {
 			var s = App{}
-			s.fwd, _ = forward.New()
-			s.lb, _ = roundrobin.New(s.fwd)
-			s.lb.UpsertServer(testutils.ParseURI("http://" + v.Host + ":" + strconv.FormatInt(v.Ports[0], 10)))
+			s.Fwd, _ = forward.New()
+			s.Lb, _ = roundrobin.New(s.Fwd)
+			s.Lb.UpsertServer(testutils.ParseURI("http://" + v.Host + ":" + strconv.FormatInt(v.Ports[0], 10)))
+			s.Tasks = []string{v.Host + ":" + strconv.FormatInt(v.Ports[0], 10)}
 			apps[v.AppId[1:]] = s
 		}
 	}
