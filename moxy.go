@@ -25,23 +25,25 @@ var apps Apps
 func main() {
 	moxystats := stats.New()
 	redirect := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		if req.URL.Path == "/moxycallback" {
+		if req.URL.Path == "/moxy_callback" {
 			log.Println("callback received from Marathon")
 			select {
 			case callbackqueue <- true: // Add reload to our queue channel, unless it is full of course.
 			default:
 				w.WriteHeader(202)
+				fmt.Fprintln(w, "queue is full")
 				return
 			}
-			w.WriteHeader(200)
+			w.WriteHeader(202)
+			fmt.Fprintln(w, "queued")
 			return
-		} else if req.URL.Path == "/moxystats" {
+		} else if req.URL.Path == "/moxy_stats" {
 			stats := moxystats.Data()
-			b, _ := json.MarshalIndent(stats, "", "    ")
+			b, _ := json.MarshalIndent(stats, "", "  ")
 			w.Write(b)
 			return
-		} else if req.URL.Path == "/moxyapps" {
-			b, _ := json.MarshalIndent(apps, "", "    ")
+		} else if req.URL.Path == "/moxy_apps" {
+			b, _ := json.MarshalIndent(apps, "", "  ")
 			w.Write(b)
 			return
 		}
