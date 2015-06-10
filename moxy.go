@@ -56,7 +56,7 @@ func main() {
 	})
 	// In case we want to log req/resp.
 	//trace, _ := trace.New(redirect, os.Stdout)
-	port := "8080"
+	port := "7000"
 	handler := moxystats.Handler(redirect)
 	s := &http.Server{
 		Addr:    ":" + port,
