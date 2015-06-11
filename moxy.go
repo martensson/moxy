@@ -29,14 +29,14 @@ func main() {
 			log.Println("callback received from Marathon")
 			select {
 			case callbackqueue <- true: // Add reload to our queue channel, unless it is full of course.
+				w.WriteHeader(202)
+				fmt.Fprintln(w, "queued")
+				return
 			default:
 				w.WriteHeader(202)
 				fmt.Fprintln(w, "queue is full")
 				return
 			}
-			w.WriteHeader(202)
-			fmt.Fprintln(w, "queued")
-			return
 		} else if req.URL.Path == "/moxy_stats" {
 			stats := moxystats.Data()
 			b, _ := json.MarshalIndent(stats, "", "  ")
@@ -47,7 +47,7 @@ func main() {
 			w.Write(b)
 			return
 		}
-		// let us forward this request to another server container
+		// let us forward this request to a running container
 		app := strings.Split(req.Host, ".")[0]
 		if s, ok := apps[app]; ok {
 			s.Lb.ServeHTTP(w, req)

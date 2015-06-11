@@ -3,6 +3,7 @@
 *.a
 *.so
 moxy
+.moxy.tmp
 
 # Folders
 _obj

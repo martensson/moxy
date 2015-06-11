@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -49,12 +50,28 @@ func callbackworker() {
 				err := config()
 				if err != nil {
 					log.Println(err.Error())
+
 				} else {
-					log.Println("config updated from Marathon")
+					log.Println("config updated")
 				}
 			}
 		}
 	}()
+}
+
+func loadbackup(jsonapps *MarathonApps) error {
+	file, err := ioutil.ReadFile(".moxy.tmp")
+	if err != nil {
+		log.Println("unable to open temp backup.")
+		return err
+	}
+	err = json.Unmarshal(file, jsonapps)
+	if err != nil {
+		log.Println("unable to unmarshal temp backup.")
+		return err
+	}
+	log.Println("successfully loaded backup config.")
+	return nil
 }
 
 func config() error {
@@ -62,6 +79,7 @@ func config() error {
 	if marathon == "" {
 		return errors.New("MARATHONAPI variable not set.")
 	}
+	jsonapps := MarathonApps{}
 	client := &http.Client{
 		Timeout: 3 * time.Second,
 	}
@@ -69,13 +87,31 @@ func config() error {
 	r.Header.Set("Accept", "application/json")
 	resp, err := client.Do(r)
 	if err != nil {
-		return err
-	}
-	jsonapps := MarathonApps{}
-	decoder := json.NewDecoder(resp.Body)
-	err = decoder.Decode(&jsonapps)
-	if err != nil {
-		return err
+		log.Println("Unable to contact Marathon:", err)
+		err := loadbackup(&jsonapps)
+		if err != nil {
+			return err
+		}
+	} else {
+		decoder := json.NewDecoder(resp.Body)
+		err = decoder.Decode(&jsonapps)
+		if err != nil {
+			loadbackup(&jsonapps)
+			if err != nil {
+				return err
+			}
+			log.Println("unable to parse json from Marathon, API changes?", err)
+		} else {
+			// We write a backup to disk, this permits us to restart moxy even if Marathon is down using last working config.
+			config, err := json.MarshalIndent(jsonapps, "", "  ")
+			if err != nil {
+				log.Println(err)
+			}
+			err = ioutil.WriteFile(".moxy.tmp", config, 0644)
+			if err != nil {
+				log.Println("unable to write temp backup to disk:", err)
+			}
+		}
 	}
 	apps = Apps{}
 	for _, v := range jsonapps.Tasks {
