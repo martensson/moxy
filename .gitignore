@@ -4,6 +4,7 @@
 *.so
 moxy
 .moxy.tmp
+moxy.toml
 
 # Folders
 _obj
