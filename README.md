@@ -3,9 +3,17 @@ moxy - HTTP Reverse Proxy / Load Balancer for Marathon+Mesos
 
 ## Getting started
 
-- Set MARATHONAPI env to your MARATHON API Endpoint `http://localhost:8080`
-- Run moxy.
-- Done!
+Edit moxy.toml:
+
+``` toml
+port = "7000"
+marathon = "http://localhost:8080"
+tls = false
+cert = "cert.pem"
+key = "key.pem"
+```
+
+And run moxy!
 
 ## Using Moxy 
 

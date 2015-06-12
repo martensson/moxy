@@ -1,4 +1,5 @@
 port = "7000"
+marathon = "http://localhost:8080"
 tls = false
 cert = "cert.pem"
 key = "key.pem"

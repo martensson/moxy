@@ -26,11 +26,14 @@ type Apps map[string]App
 var apps Apps
 
 type Config struct {
-	Port string
-	TLS  bool
-	Cert string
-	Key  string
+	Port     string
+	Marathon string
+	TLS      bool
+	Cert     string
+	Key      string
 }
+
+var config Config
 
 func moxy_proxy(w http.ResponseWriter, r *http.Request) {
 	// let us forward this request to a running container
@@ -69,7 +72,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	var config Config
 	err = toml.Unmarshal(file, &config)
 	if err != nil {
 		log.Fatal("Problem parsing config: ", err)

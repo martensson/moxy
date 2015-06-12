@@ -2,11 +2,9 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 
@@ -47,7 +45,7 @@ func callbackworker() {
 			select {
 			case <-ticker.C:
 				<-callbackqueue
-				err := config()
+				err := reload()
 				if err != nil {
 					log.Println(err.Error())
 
@@ -74,16 +72,12 @@ func loadbackup(jsonapps *MarathonApps) error {
 	return nil
 }
 
-func config() error {
-	marathon := os.Getenv("MARATHONAPI")
-	if marathon == "" {
-		return errors.New("MARATHONAPI variable not set.")
-	}
+func reload() error {
 	jsonapps := MarathonApps{}
 	client := &http.Client{
 		Timeout: 3 * time.Second,
 	}
-	r, err := http.NewRequest("GET", marathon+"/v2/tasks", nil)
+	r, err := http.NewRequest("GET", config.Marathon+"/v2/tasks", nil)
 	r.Header.Set("Accept", "application/json")
 	resp, err := client.Do(r)
 	if err != nil {
