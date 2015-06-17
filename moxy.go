@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"sync"
 
 	"github.com/BurntSushi/toml"
 	"github.com/mailgun/oxy/forward"
@@ -21,7 +22,12 @@ type App struct {
 	Fwd   *forward.Forwarder     `json:"-"`
 	Lb    *roundrobin.RoundRobin `json:"-"`
 }
-type Apps map[string]App
+type Apps struct {
+	sync.RWMutex
+	Apps map[string]App
+}
+
+//type Apps map[string]App
 
 var apps Apps
 
@@ -38,7 +44,9 @@ var config Config
 func moxy_proxy(w http.ResponseWriter, r *http.Request) {
 	// let us forward this request to a running container
 	app := strings.Split(r.Host, ".")[0]
-	if s, ok := apps[app]; ok {
+	apps.RLock()
+	defer apps.RUnlock()
+	if s, ok := apps.Apps[app]; ok {
 		s.Lb.ServeHTTP(w, r)
 		return
 	}
@@ -60,6 +68,8 @@ func moxy_callback(w http.ResponseWriter, r *http.Request) {
 }
 
 func moxy_apps(w http.ResponseWriter, r *http.Request) {
+	apps.RLock()
+	defer apps.RUnlock()
 	b, _ := json.MarshalIndent(apps, "", "  ")
 	w.Write(b)
 	return

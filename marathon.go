@@ -107,24 +107,26 @@ func reload() error {
 			}
 		}
 	}
-	apps = Apps{}
+	apps = Apps{Apps: make(map[string]App)}
+	apps.Lock()
+	defer apps.Unlock()
 	for _, v := range jsonapps.Tasks {
 		if len(v.HealthCheckResults) == 1 {
 			if v.HealthCheckResults[0].Alive == false {
 				continue
 			}
 		}
-		if s, ok := apps[v.AppId[1:]]; ok {
+		if s, ok := apps.Apps[v.AppId[1:]]; ok {
 			s.Lb.UpsertServer(testutils.ParseURI("http://" + v.Host + ":" + strconv.FormatInt(v.Ports[0], 10)))
 			s.Tasks = append(s.Tasks, v.Host+":"+strconv.FormatInt(v.Ports[0], 10))
-			apps[v.AppId[1:]] = s
+			apps.Apps[v.AppId[1:]] = s
 		} else {
 			var s = App{}
 			s.Fwd, _ = forward.New()
 			s.Lb, _ = roundrobin.New(s.Fwd)
 			s.Lb.UpsertServer(testutils.ParseURI("http://" + v.Host + ":" + strconv.FormatInt(v.Ports[0], 10)))
 			s.Tasks = []string{v.Host + ":" + strconv.FormatInt(v.Ports[0], 10)}
-			apps[v.AppId[1:]] = s
+			apps.Apps[v.AppId[1:]] = s
 		}
 	}
 	return nil
