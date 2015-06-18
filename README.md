@@ -1,7 +1,7 @@
 # moxy
 [![Build Status](https://travis-ci.org/martensson/moxy.svg?branch=master)](https://travis-ci.org/martensson/moxy)
 
-moxy is a Reverse Proxy and Load Balancer that automatically configures itself for web services deployed on [Apache Mesos](http://mesos.apache.org) and [Marathon](https://mesosphere.github.io/marathon/).
+moxy is a HTTP Reverse Proxy and Load Balancer that automatically configures itself for web services deployed on [Apache Mesos](http://mesos.apache.org) and [Marathon](https://mesosphere.github.io/marathon/).
 
 Features:
 
