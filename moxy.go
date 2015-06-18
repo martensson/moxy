@@ -1,4 +1,3 @@
-/* moxy - The Marathon+Mesos http reverse proxy - code by <benjamin.martensson@nrk.no> */
 package main
 
 import (
