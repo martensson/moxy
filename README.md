@@ -1,8 +1,7 @@
 # moxy
 [![Build Status](https://travis-ci.org/martensson/moxy.svg?branch=master)](https://travis-ci.org/martensson/moxy)
 
-moxy - HTTP Reverse Proxy / Load Balancer for Marathon+Mesos
-
+moxy is a Reverse Proxy and Load Balancer that automatically configures itself for web services deployed on [Apache Mesos](http://mesos.apache.org) and [Marathon](https://mesosphere.github.io/marathon/).
 
 Features:
 
@@ -11,7 +10,7 @@ Features:
 * Support for TLS termination
 * Event callback listener to always be up-to-date with changes inside Marathon
 * Local file backups of Marathon states, moxy keeps serving your apps even if Marathon goes down
-* + More features to come...
+* + more on the works...
 
 ## Compatibility
 
