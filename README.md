@@ -1,15 +1,15 @@
 # moxy
 [![Build Status](https://travis-ci.org/martensson/moxy.svg?branch=master)](https://travis-ci.org/martensson/moxy)
 
-moxy is a HTTP Reverse Proxy and Load Balancer that automatically configures itself for microservices deployed on [Apache Mesos](http://mesos.apache.org) and [Marathon](https://mesosphere.github.io/marathon/). It is inspired by [Vulcand](https://github.com/mailgun/vulcand) and moxy in fact uses the same proxy library written by the nice people at Mailgun.
+moxy is a HTTP Reverse Proxy and Load Balancer that automatically configures itself for microservices deployed on [Apache Mesos](http://mesos.apache.org) and [Marathon](https://mesosphere.github.io/marathon/). It is inspired by [Vulcand](https://github.com/mailgun/vulcand) and moxy does in fact use the same proxy library written by the nice people at Mailgun.
 
 Features:
 
-* Reverse proxy and rr-loadbalancer for your apps running inside Marathon/Mesos
-* Single binary for easy deployment
-* Support for TLS termination
-* Event callback listener to always be up-to-date with changes inside Marathon
-* Local file backups of Marathon states, moxy keeps serving your apps even if Marathon goes down
+* Reverse proxy and load balancer for your microservices running inside Mesos and Marathon
+* Single binary with no other dependencies for easy deployment
+* Supports TLS termination
+* Event callback listener to automatically be up-to-date with Marathon
+* Local file backups of Marathon states, so moxy will keep serving your apps even if Marathon goes down
 * + more on the works...
 
 ## Compatibility
