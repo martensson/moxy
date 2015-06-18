@@ -1,5 +1,5 @@
 port = "7000"
 marathon = "http://localhost:8080"
-tls = false
+tls = false # optional if you want moxy to terminate tls
 cert = "cert.pem"
 key = "key.pem"

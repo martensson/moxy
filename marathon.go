@@ -13,7 +13,7 @@ import (
 	"github.com/mailgun/oxy/testutils"
 )
 
-type MarathonApps struct {
+type MarathonTasks struct {
 	Tasks []struct {
 		AppId              string `json:"appId"`
 		HealthCheckResults []struct {
@@ -34,6 +34,13 @@ type MarathonApps struct {
 	} `json:"tasks"`
 }
 
+type MarathonApps struct {
+	Apps []struct {
+		Id     string            `json:"id"`
+		Labels map[string]string `json:"labels"`
+	} `json:"apps"`
+}
+
 // buffer of two, because we dont really need more.
 var callbackqueue = make(chan bool, 2)
 
@@ -48,7 +55,6 @@ func callbackworker() {
 				err := reload()
 				if err != nil {
 					log.Println(err.Error())
-
 				} else {
 					log.Println("config updated")
 				}
@@ -57,77 +63,119 @@ func callbackworker() {
 	}()
 }
 
-func loadbackup(jsonapps *MarathonApps) error {
-	file, err := ioutil.ReadFile(".moxy.tmp")
+func createBackup(jsontasks *MarathonTasks, jsonapps *MarathonApps) error {
+	backup, err := json.MarshalIndent(jsontasks, "", "  ")
 	if err != nil {
-		log.Println("unable to open temp backup.")
+		return err
+	}
+	err = ioutil.WriteFile(".moxy.tasks.tmp", backup, 0644)
+	if err != nil {
+		return err
+	}
+	backup, err = json.MarshalIndent(jsonapps, "", "  ")
+	if err != nil {
+		return err
+	}
+	err = ioutil.WriteFile(".moxy.apps.tmp", backup, 0644)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func loadBackup(jsontasks *MarathonTasks, jsonapps *MarathonApps) error {
+	file, err := ioutil.ReadFile(".moxy.tasks.tmp")
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(file, jsontasks)
+	if err != nil {
+		return err
+	}
+	file, err = ioutil.ReadFile(".moxy.apps.tmp")
+	if err != nil {
 		return err
 	}
 	err = json.Unmarshal(file, jsonapps)
 	if err != nil {
-		log.Println("unable to unmarshal temp backup.")
 		return err
 	}
-	log.Println("successfully loaded backup config.")
 	return nil
 }
 
-func reload() error {
-	jsonapps := MarathonApps{}
+func fetchApps(jsontasks *MarathonTasks, jsonapps *MarathonApps) error {
 	client := &http.Client{
 		Timeout: 3 * time.Second,
 	}
-	r, err := http.NewRequest("GET", config.Marathon+"/v2/tasks", nil)
+	r, _ := http.NewRequest("GET", config.Marathon+"/v2/tasks", nil)
 	r.Header.Set("Accept", "application/json")
 	resp, err := client.Do(r)
+	decoder := json.NewDecoder(resp.Body)
+	err = decoder.Decode(&jsontasks)
 	if err != nil {
-		log.Println("Unable to contact Marathon:", err)
-		err := loadbackup(&jsonapps)
-		if err != nil {
-			return err
-		}
-	} else {
-		decoder := json.NewDecoder(resp.Body)
-		err = decoder.Decode(&jsonapps)
-		if err != nil {
-			loadbackup(&jsonapps)
-			if err != nil {
-				return err
-			}
-			log.Println("unable to parse json from Marathon, API changes?", err)
-		} else {
-			// We write a backup to disk, this permits us to restart moxy even if Marathon is down using last working config.
-			config, err := json.MarshalIndent(jsonapps, "", "  ")
-			if err != nil {
-				log.Println(err)
-			}
-			err = ioutil.WriteFile(".moxy.tmp", config, 0644)
-			if err != nil {
-				log.Println("unable to write temp backup to disk:", err)
-			}
-		}
+		return err
 	}
+	r, _ = http.NewRequest("GET", config.Marathon+"/v2/apps", nil)
+	r.Header.Set("Accept", "application/json")
+	resp, err = client.Do(r)
+	decoder = json.NewDecoder(resp.Body)
+	err = decoder.Decode(&jsonapps)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func syncApps(jsontasks *MarathonTasks, jsonapps *MarathonApps) {
 	apps = Apps{Apps: make(map[string]App)}
 	apps.Lock()
 	defer apps.Unlock()
-	for _, v := range jsonapps.Tasks {
-		if len(v.HealthCheckResults) == 1 {
-			if v.HealthCheckResults[0].Alive == false {
+	for _, task := range jsontasks.Tasks {
+		appid := task.AppId[1:]
+		for _, v := range jsonapps.Apps {
+			if v.Id == task.AppId {
+				if s, ok := v.Labels["moxy_subdomain"]; ok {
+					appid = s
+				}
+			}
+		}
+		if len(task.HealthCheckResults) == 1 {
+			if task.HealthCheckResults[0].Alive == false {
 				continue
 			}
 		}
-		if s, ok := apps.Apps[v.AppId[1:]]; ok {
-			s.Lb.UpsertServer(testutils.ParseURI("http://" + v.Host + ":" + strconv.FormatInt(v.Ports[0], 10)))
-			s.Tasks = append(s.Tasks, v.Host+":"+strconv.FormatInt(v.Ports[0], 10))
-			apps.Apps[v.AppId[1:]] = s
+		if s, ok := apps.Apps[appid]; ok {
+			s.Lb.UpsertServer(testutils.ParseURI("http://" + task.Host + ":" + strconv.FormatInt(task.Ports[0], 10)))
+			s.Tasks = append(s.Tasks, task.Host+":"+strconv.FormatInt(task.Ports[0], 10))
+			apps.Apps[appid] = s
 		} else {
 			var s = App{}
 			s.Fwd, _ = forward.New()
 			s.Lb, _ = roundrobin.New(s.Fwd)
-			s.Lb.UpsertServer(testutils.ParseURI("http://" + v.Host + ":" + strconv.FormatInt(v.Ports[0], 10)))
-			s.Tasks = []string{v.Host + ":" + strconv.FormatInt(v.Ports[0], 10)}
-			apps.Apps[v.AppId[1:]] = s
+			s.Lb.UpsertServer(testutils.ParseURI("http://" + task.Host + ":" + strconv.FormatInt(task.Ports[0], 10)))
+			s.Tasks = []string{task.Host + ":" + strconv.FormatInt(task.Ports[0], 10)}
+			apps.Apps[appid] = s
 		}
+	}
+}
+
+func reload() error {
+	jsontasks := MarathonTasks{}
+	jsonapps := MarathonApps{}
+	err := fetchApps(&jsontasks, &jsonapps)
+	if err != nil {
+		log.Println("Unable to sync from Marathon:", err)
+		err = loadBackup(&jsontasks, &jsonapps)
+		if err != nil {
+			return err
+		}
+		log.Println("successfully loaded backup config.")
+	}
+	syncApps(&jsontasks, &jsonapps)
+	// We write a backup to disk, this permits us to restart moxy even if Marathon is down using last working config.
+	err = createBackup(&jsontasks, &jsonapps)
+	if err != nil {
+		log.Println("Unable to create backup:", err)
 	}
 	return nil
 }
