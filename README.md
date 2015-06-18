@@ -1,5 +1,8 @@
 # moxy
+[![Build Status](https://travis-ci.org/martensson/moxy.svg?branch=master)](https://travis-ci.org/martensson/moxy)
+
 moxy - HTTP Reverse Proxy / Load Balancer for Marathon+Mesos
+
 
 Features:
 
