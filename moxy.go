@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"runtime"
 	"strings"
 	"sync"
 
@@ -75,6 +76,7 @@ func moxy_apps(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	runtime.GOMAXPROCS(runtime.NumCPU())
 	configtoml := flag.String("f", "moxy.toml", "Path to config. (default moxy.toml)")
 	flag.Parse()
 	file, err := ioutil.ReadFile(*configtoml)
