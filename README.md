@@ -8,6 +8,7 @@ Features:
 * Reverse proxy and load balancer for your microservices running inside Mesos and Marathon
 * Single binary with no other dependencies for easy deployment
 * Supports TLS termination
+* Statistics of req/s per application via statsd
 * Event callback listener to automatically be up-to-date with Marathon
 * Local file backups of Marathon states, so moxy will keep serving your apps even if Marathon goes down
 * + more on the works...
@@ -23,7 +24,8 @@ Edit moxy.toml:
 ``` toml
 port = "7000"
 marathon = "http://localhost:8080"
-tls = false
+statsd = "example.com:8125" # optional if you want to graph req/s per app
+tls = false # optional if you want moxy to terminate tls
 cert = "cert.pem"
 key = "key.pem"
 ```

@@ -1,5 +1,6 @@
 port = "7000"
 marathon = "http://localhost:8080"
+statsd = "example.com:8125" # optional if you want to graph req/s per app
 tls = false # optional if you want moxy to terminate tls
 cert = "cert.pem"
 key = "key.pem"

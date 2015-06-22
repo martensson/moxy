@@ -14,6 +14,7 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/mailgun/oxy/forward"
 	"github.com/mailgun/oxy/roundrobin"
+	"github.com/peterbourgon/g2s"
 	"github.com/thoas/stats"
 )
 
@@ -34,12 +35,14 @@ var apps Apps
 type Config struct {
 	Port     string
 	Marathon string
+	Statsd   string
 	TLS      bool
 	Cert     string
 	Key      string
 }
 
 var config Config
+var statsd g2s.Statter
 
 func moxy_proxy(w http.ResponseWriter, r *http.Request) {
 	// let us forward this request to a running container
@@ -47,6 +50,11 @@ func moxy_proxy(w http.ResponseWriter, r *http.Request) {
 	apps.RLock()
 	defer apps.RUnlock()
 	if s, ok := apps.Apps[app]; ok {
+		go func(app string) {
+			if config.Statsd != "" {
+				statsd.Counter(1.0, "moxy."+app, 1)
+			}
+		}(app)
 		s.Lb.ServeHTTP(w, r)
 		return
 	}
@@ -86,6 +94,9 @@ func main() {
 	err = toml.Unmarshal(file, &config)
 	if err != nil {
 		log.Fatal("Problem parsing config: ", err)
+	}
+	if config.Statsd != "" {
+		statsd, _ = g2s.Dial("udp", config.Statsd)
 	}
 	moxystats := stats.New()
 	mux := http.NewServeMux()
