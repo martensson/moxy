@@ -5,6 +5,8 @@
 moxy
 .moxy.*
 moxy.toml
+.goxc.local.json
+dist
 
 # Folders
 _obj
