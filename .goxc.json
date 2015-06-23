@@ -9,22 +9,22 @@
 	],
 	"Arch": "386 amd64",
 	"Os": "linux darwin windows freebsd",
-	"PackageVersion": "0.0.3",
+	"PackageVersion": "0.0.4",
 	"TaskSettings": {
-        "deb": {
-            "armarch": "",
-            "bin-dir": "/usr/bin",
-            "go-sources-dir": ".",
-            "metadata": {
-                "description": "moxy http proxy",
-                "maintainer": "Benjamin Mårtensson (https://github.com/martensson)",
-                "maintainerEmail": "benjamin@martensson.io"
-            },
-            "other-mappped-files": {
-                "/etc/moxy.toml": "moxy.toml",
-                "/etc/init/moxy.conf": "moxy-upstart.conf"
-            }
-        },
+		"deb": {
+			"armarch": "",
+			"bin-dir": "/usr/bin",
+			"go-sources-dir": ".",
+			"metadata": {
+				"description": "moxy http proxy",
+				"maintainer": "Benjamin Mårtensson (https://github.com/martensson)",
+				"maintainerEmail": "benjamin@martensson.io"
+			},
+			"other-mapped-files": {
+				"/etc/init/moxy.conf": "moxy-upstart.conf",
+				"/etc/moxy.toml": "moxy.toml"
+			}
+		},
 		"publish-github": {
 			"owner": "martensson",
 			"repository": "moxy"
