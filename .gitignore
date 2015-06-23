@@ -4,7 +4,7 @@
 *.so
 moxy
 .moxy.*
-moxy.toml
+moxy.toml_local
 .goxc.local.json
 dist
 

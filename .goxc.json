@@ -1,18 +1,8 @@
 {
 	"ArtifactsDest": "dist",
 	"Tasks": [
-		"freebsd",
-		"go-vet",
-		"go-test",
-		"xc",
-		"codesign",
-		"copy-resources",
-		"archive-zip",
-		"archive-tar-gz",
 		"deb",
-		"deb-dev",
-		"rmbin",
-		"publish-github"
+		"other-mapped-files=/etc/moxy.toml: moxy.toml"
 	],
 	"TasksExclude": [
 		"go-install"
@@ -21,6 +11,20 @@
 	"Os": "linux darwin windows freebsd",
 	"PackageVersion": "0.0.3",
 	"TaskSettings": {
+        "deb": {
+            "armarch": "",
+            "bin-dir": "/usr/bin",
+            "go-sources-dir": ".",
+            "metadata": {
+                "description": "moxy http proxy",
+                "maintainer": "Benjamin Mårtensson (https://github.com/martensson)",
+                "maintainerEmail": "benjamin@martensson.io"
+            },
+            "other-mappped-files": {
+                "/etc/moxy.toml": "moxy.toml",
+                "/etc/init/moxy.conf": "moxy-upstart.conf"
+            }
+        },
 		"publish-github": {
 			"owner": "martensson",
 			"repository": "moxy"

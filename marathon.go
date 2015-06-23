@@ -68,7 +68,7 @@ func createBackup(jsontasks *MarathonTasks, jsonapps *MarathonApps) error {
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(".moxy.tasks.tmp", backup, 0644)
+	err = ioutil.WriteFile("/tmp/.moxy.tasks.tmp", backup, 0644)
 	if err != nil {
 		return err
 	}
@@ -76,7 +76,7 @@ func createBackup(jsontasks *MarathonTasks, jsonapps *MarathonApps) error {
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(".moxy.apps.tmp", backup, 0644)
+	err = ioutil.WriteFile("/tmp/.moxy.apps.tmp", backup, 0644)
 	if err != nil {
 		return err
 	}
@@ -84,7 +84,7 @@ func createBackup(jsontasks *MarathonTasks, jsonapps *MarathonApps) error {
 }
 
 func loadBackup(jsontasks *MarathonTasks, jsonapps *MarathonApps) error {
-	file, err := ioutil.ReadFile(".moxy.tasks.tmp")
+	file, err := ioutil.ReadFile("/tmp/.moxy.tasks.tmp")
 	if err != nil {
 		return err
 	}
@@ -92,7 +92,7 @@ func loadBackup(jsontasks *MarathonTasks, jsonapps *MarathonApps) error {
 	if err != nil {
 		return err
 	}
-	file, err = ioutil.ReadFile(".moxy.apps.tmp")
+	file, err = ioutil.ReadFile("/tmp/.moxy.apps.tmp")
 	if err != nil {
 		return err
 	}
@@ -110,6 +110,9 @@ func fetchApps(jsontasks *MarathonTasks, jsonapps *MarathonApps) error {
 	r, _ := http.NewRequest("GET", config.Marathon+"/v2/tasks", nil)
 	r.Header.Set("Accept", "application/json")
 	resp, err := client.Do(r)
+	if err != nil {
+		return err
+	}
 	decoder := json.NewDecoder(resp.Body)
 	err = decoder.Decode(&jsontasks)
 	if err != nil {
@@ -118,6 +121,9 @@ func fetchApps(jsontasks *MarathonTasks, jsonapps *MarathonApps) error {
 	r, _ = http.NewRequest("GET", config.Marathon+"/v2/apps", nil)
 	r.Header.Set("Accept", "application/json")
 	resp, err = client.Do(r)
+	if err != nil {
+		return err
+	}
 	decoder = json.NewDecoder(resp.Body)
 	err = decoder.Decode(&jsonapps)
 	if err != nil {
