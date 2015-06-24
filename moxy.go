@@ -36,6 +36,7 @@ type Config struct {
 	Port     string
 	Marathon string
 	Statsd   string
+	Prefix   string
 	TLS      bool
 	Cert     string
 	Key      string
@@ -52,7 +53,7 @@ func moxy_proxy(w http.ResponseWriter, r *http.Request) {
 	if s, ok := apps.Apps[app]; ok {
 		go func(app string) {
 			if config.Statsd != "" {
-				statsd.Counter(1.0, "moxy."+app, 1)
+				statsd.Counter(1.0, config.Prefix+app, 1)
 			}
 		}(app)
 		s.Lb.ServeHTTP(w, r)

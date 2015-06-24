@@ -1,6 +1,14 @@
+# moxy listening port
 port = "7000"
+
+# marathon api
 marathon = "http://localhost:8080"
-statsd = "example.com:8125" # optional if you want to graph req/s per app
+
+# statsd settings
+statsd = "localhost:8125" # optional if you want to graph req/s per app
+prefix = "moxy."
+
+# tls settings
 tls = false # optional if you want moxy to terminate tls
 cert = "cert.pem"
 key = "key.pem"
