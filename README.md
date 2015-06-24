@@ -19,20 +19,30 @@ Tested againts Marathon 0.8.1 and Mesos 0.22.1
 
 ## Getting started
 
-Edit moxy.toml:
+1. Easiest is to install moxy from pre-compiled packages. Check `releases` page.
+
+2. Edit config (default on ubuntu is /etc/moxy.toml):
 
 ``` toml
+# moxy listening port
 port = "7000"
+
+# marathon api
 marathon = "http://localhost:8080"
-statsd = "example.com:8125" # optional if you want to graph req/s per app
+
+# statsd settings
+statsd = "localhost:8125" # optional if you want to graph req/s per app
+prefix = "moxy."
+
+# tls settings
 tls = false # optional if you want moxy to terminate tls
 cert = "cert.pem"
 key = "key.pem"
 ```
 
-Add the moxy url + `/moxy_callback` to your callbacks in Marathon.
+3. Add the moxy url + `/moxy_callback` to your callbacks in Marathon.
 
-Start moxy!
+4. Run moxy!
 
 ## Using Moxy
 
