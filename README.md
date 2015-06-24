@@ -1,5 +1,4 @@
-# moxy
-[![Build Status](https://travis-ci.org/martensson/moxy.svg?branch=master)](https://travis-ci.org/martensson/moxy)
+# moxy [![Build Status](https://travis-ci.org/martensson/moxy.svg?branch=master)](https://travis-ci.org/martensson/moxy)
 
 moxy is a HTTP Reverse Proxy and Load Balancer that automatically configures itself for microservices deployed on [Apache Mesos](http://mesos.apache.org) and [Marathon](https://mesosphere.github.io/marathon/). It is inspired by [Vulcand](https://github.com/mailgun/vulcand) and moxy does in fact use the same proxy library written by the nice people at Mailgun.
 
