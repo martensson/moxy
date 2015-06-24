@@ -9,7 +9,7 @@
 	],
 	"Arch": "386 amd64",
 	"Os": "linux darwin windows freebsd",
-	"PackageVersion": "0.0.4",
+	"PackageVersion": "0.0.5",
 	"TaskSettings": {
 		"deb": {
 			"armarch": "",
@@ -22,7 +22,7 @@
 			},
 			"other-mapped-files": {
 				"/etc/init/moxy.conf": "moxy-upstart.conf",
-				"/etc/moxy.toml": "moxy.toml"
+				"/etc/moxy-example.toml": "moxy.toml"
 			}
 		},
 		"publish-github": {
