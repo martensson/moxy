@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"regexp"
 	"strconv"
 	"time"
 
@@ -137,7 +138,9 @@ func syncApps(jsontasks *MarathonTasks, jsonapps *MarathonApps) {
 	apps.Lock()
 	defer apps.Unlock()
 	for _, task := range jsontasks.Tasks {
-		appid := task.AppId[1:]
+		// Use regex to remove characters that are not allowed in hostnames
+		re := regexp.MustCompile("[^0-9a-z-]")
+		appid := re.ReplaceAllLiteralString(task.AppId, "")
 		for _, v := range jsonapps.Apps {
 			if v.Id == task.AppId {
 				if s, ok := v.Labels["moxy_subdomain"]; ok {
