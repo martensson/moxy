@@ -159,7 +159,7 @@ func syncApps(jsontasks *MarathonTasks, jsonapps *MarathonApps) {
 			apps.Apps[appid] = s
 		} else {
 			var s = App{}
-			s.Fwd, _ = forward.New()
+			s.Fwd, _ = forward.New(forward.PassHostHeader(true))
 			s.Lb, _ = roundrobin.New(s.Fwd)
 			s.Lb.UpsertServer(testutils.ParseURI("http://" + task.Host + ":" + strconv.FormatInt(task.Ports[0], 10)))
 			s.Tasks = []string{task.Host + ":" + strconv.FormatInt(task.Ports[0], 10)}
