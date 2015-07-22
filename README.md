@@ -26,6 +26,9 @@ Tested againts Marathon 0.8.1 and Mesos 0.22.1
 # moxy listening port
 port = "7000"
 
+# optional X-Proxy header name
+xproxy = "hostname"
+
 # marathon api
 marathon = "http://localhost:8080"
 
