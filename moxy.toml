@@ -1,6 +1,9 @@
 # moxy listening port
 port = "7000"
 
+# optional X-Proxy header name
+xproxy = "hostname"
+
 # marathon api
 marathon = "http://localhost:8080"
 

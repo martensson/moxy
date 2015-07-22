@@ -28,12 +28,11 @@ type Apps struct {
 	Apps map[string]App
 }
 
-//type Apps map[string]App
-
 var apps Apps
 
 type Config struct {
 	Port     string
+	Xproxy   string
 	Marathon string
 	Statsd   string
 	Prefix   string
@@ -46,7 +45,6 @@ var config Config
 var statsd g2s.Statter
 
 func moxy_proxy(w http.ResponseWriter, r *http.Request) {
-	// let us forward this request to a running container
 	app := strings.Split(r.Host, ".")[0]
 	apps.RLock()
 	defer apps.RUnlock()
@@ -56,6 +54,10 @@ func moxy_proxy(w http.ResponseWriter, r *http.Request) {
 				statsd.Counter(1.0, config.Prefix+app, 1)
 			}
 		}(app)
+		// let us forward this request to a running container
+		if config.Xproxy != "" {
+			w.Header().Add("X-Proxy", config.Xproxy)
+		}
 		s.Lb.ServeHTTP(w, r)
 		return
 	}
