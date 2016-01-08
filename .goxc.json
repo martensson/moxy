@@ -9,7 +9,7 @@
 	],
 	"Arch": "386 amd64",
 	"Os": "linux darwin windows freebsd",
-	"PackageVersion": "0.1.1",
+	"PackageVersion": "0.1.2",
 	"TaskSettings": {
 		"deb": {
 			"armarch": "",
