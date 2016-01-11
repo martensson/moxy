@@ -45,14 +45,12 @@ var statsd g2s.Statter
 
 func moxy_proxy(w http.ResponseWriter, r *http.Request) {
 	app := strings.Split(r.Host, ".")[0]
-	apps.RLock()
-	defer apps.RUnlock()
 	if s, ok := apps.Apps[app]; ok {
-		go func(app string) {
-			if config.Statsd != "" {
+		if config.Statsd != "" {
+			go func(app string) {
 				statsd.Counter(1.0, config.Prefix+app, 1)
-			}
-		}(app)
+			}(app)
+		}
 		// let us forward this request to a running container
 		if config.Xproxy != "" {
 			w.Header().Add("X-Proxy", config.Xproxy)
