@@ -106,6 +106,9 @@ func main() {
 	mux.HandleFunc("/moxy_callback", moxy_callback)
 	mux.HandleFunc("/moxy_apps", moxy_apps)
 	mux.HandleFunc("/moxy_stats", func(w http.ResponseWriter, req *http.Request) {
+		if config.Xproxy != "" {
+			w.Header().Add("X-Proxy", config.Xproxy)
+		}
 		stats := moxystats.Data()
 		b, _ := json.MarshalIndent(stats, "", "  ")
 		w.Write(b)
