@@ -9,12 +9,12 @@ Features:
 * Supports TLS termination
 * Statistics of req/s per application via statsd
 * Event callback listener to automatically be up-to-date with Marathon
-* Local file backups of Marathon states, so moxy will keep serving your apps even if Marathon goes down
+* Local file backups of Marathon states, so moxy will keep serving your apps even if Marathon goes down or across restarts.
 * + more on the works...
 
 ## Compatibility
 
-Tested againts Marathon 0.8.1 and Mesos 0.22.1
+Tested againts Marathon 0.8.1<->0.13.0 and Mesos 0.22<->0.26
 
 ## Getting started
 
