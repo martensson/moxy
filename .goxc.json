@@ -7,8 +7,8 @@
 	"TasksExclude": [
 		"go-install"
 	],
-	"Arch": "386 amd64",
-	"Os": "linux darwin windows freebsd",
+	"Arch": "amd64",
+	"Os": "linux",
 	"PackageVersion": "0.1.5",
 	"TaskSettings": {
 		"deb": {
