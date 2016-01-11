@@ -45,6 +45,9 @@ var statsd g2s.Statter
 
 func moxy_proxy(w http.ResponseWriter, r *http.Request) {
 	app := strings.Split(r.Host, ".")[0]
+	if config.Xproxy != "" {
+		w.Header().Add("X-Proxy", config.Xproxy)
+	}
 	if s, ok := apps.Apps[app]; ok {
 		if config.Statsd != "" {
 			go func(app string) {
@@ -52,9 +55,6 @@ func moxy_proxy(w http.ResponseWriter, r *http.Request) {
 			}(app)
 		}
 		// let us forward this request to a running container
-		if config.Xproxy != "" {
-			w.Header().Add("X-Proxy", config.Xproxy)
-		}
 		s.Lb.ServeHTTP(w, r)
 		return
 	}
@@ -63,6 +63,9 @@ func moxy_proxy(w http.ResponseWriter, r *http.Request) {
 
 func moxy_callback(w http.ResponseWriter, r *http.Request) {
 	log.Println("callback received from Marathon")
+	if config.Xproxy != "" {
+		w.Header().Add("X-Proxy", config.Xproxy)
+	}
 	select {
 	case callbackqueue <- true: // Add reload to our queue channel, unless it is full of course.
 		w.WriteHeader(202)
@@ -76,8 +79,9 @@ func moxy_callback(w http.ResponseWriter, r *http.Request) {
 }
 
 func moxy_apps(w http.ResponseWriter, r *http.Request) {
-	apps.RLock()
-	defer apps.RUnlock()
+	if config.Xproxy != "" {
+		w.Header().Add("X-Proxy", config.Xproxy)
+	}
 	b, _ := json.MarshalIndent(apps, "", "  ")
 	w.Write(b)
 	return
