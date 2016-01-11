@@ -58,7 +58,8 @@ func moxy_proxy(w http.ResponseWriter, r *http.Request) {
 		s.Lb.ServeHTTP(w, r)
 		return
 	}
-	fmt.Fprintln(w, "moxy")
+	w.WriteHeader(503)
+	fmt.Fprintln(w, "503 Service Unavailable\n\nNo server is available to handle this request.")
 }
 
 func moxy_callback(w http.ResponseWriter, r *http.Request) {
