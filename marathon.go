@@ -18,12 +18,7 @@ type MarathonTasks struct {
 	Tasks []struct {
 		AppId              string `json:"appId"`
 		HealthCheckResults []struct {
-			Alive               bool        `json:"alive"`
-			ConsecutiveFailures int64       `json:"consecutiveFailures"`
-			FirstSuccess        string      `json:"firstSuccess"`
-			LastFailure         interface{} `json:"lastFailure"`
-			LastSuccess         string      `json:"lastSuccess"`
-			TaskId              string      `json:"taskId"`
+			Alive bool `json:"alive"`
 		} `json:"healthCheckResults"`
 		Host         string  `json:"host"`
 		Id           string  `json:"id"`
@@ -37,8 +32,9 @@ type MarathonTasks struct {
 
 type MarathonApps struct {
 	Apps []struct {
-		Id     string            `json:"id"`
-		Labels map[string]string `json:"labels"`
+		Id           string            `json:"id"`
+		Labels       map[string]string `json:"labels"`
+		HealthChecks []interface{}     `json:"healthChecks"`
 	} `json:"apps"`
 }
 
@@ -141,16 +137,27 @@ func syncApps(jsontasks *MarathonTasks, jsonapps *MarathonApps) {
 		// Use regex to remove characters that are not allowed in hostnames
 		re := regexp.MustCompile("[^0-9a-z-]")
 		appid := re.ReplaceAllLiteralString(task.AppId, "")
+		apphealth := false
 		for _, v := range jsonapps.Apps {
 			if v.Id == task.AppId {
 				if s, ok := v.Labels["moxy_subdomain"]; ok {
 					appid = s
 				}
+				if len(v.HealthChecks) > 0 {
+					apphealth = true
+				}
 			}
 		}
-		if len(task.HealthCheckResults) == 1 {
-			if task.HealthCheckResults[0].Alive == false {
+		if apphealth {
+			if len(task.HealthCheckResults) == 0 {
+				// this means tasks is being deployed but not yet monitored as alive. Assume down.
 				continue
+			}
+			for _, health := range task.HealthCheckResults {
+				// check if task is alive
+				if health.Alive == false {
+					continue
+				}
 			}
 		}
 		if s, ok := apps.Apps[appid]; ok {
