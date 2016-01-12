@@ -153,11 +153,16 @@ func syncApps(jsontasks *MarathonTasks, jsonapps *MarathonApps) {
 				// this means tasks is being deployed but not yet monitored as alive. Assume down.
 				continue
 			}
+			alive := true
 			for _, health := range task.HealthCheckResults {
-				// check if task is alive
+				// check if health check is alive
 				if health.Alive == false {
-					continue
+					alive = false
 				}
+			}
+			if alive != true {
+				// at least one health check has failed. Assume down.
+				continue
 			}
 		}
 		if s, ok := apps.Apps[appid]; ok {
