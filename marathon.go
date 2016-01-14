@@ -107,6 +107,7 @@ func fetchApps(jsontasks *MarathonTasks, jsonapps *MarathonApps) error {
 	r, _ := http.NewRequest("GET", config.Marathon+"/v2/tasks", nil)
 	r.Header.Set("Accept", "application/json")
 	resp, err := client.Do(r)
+	defer resp.Body.Close()
 	if err != nil {
 		return err
 	}
@@ -118,6 +119,7 @@ func fetchApps(jsontasks *MarathonTasks, jsonapps *MarathonApps) error {
 	r, _ = http.NewRequest("GET", config.Marathon+"/v2/apps", nil)
 	r.Header.Set("Accept", "application/json")
 	resp, err = client.Do(r)
+	defer resp.Body.Close()
 	if err != nil {
 		return err
 	}
