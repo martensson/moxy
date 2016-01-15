@@ -134,7 +134,7 @@ func fetchApps(jsontasks *MarathonTasks, jsonapps *MarathonApps) error {
 func syncApps(jsontasks *MarathonTasks, jsonapps *MarathonApps) {
 	apps.Lock()
 	defer apps.Unlock()
-	apps.Apps = make(map[string]App)
+	appstmp := make(map[string]App)
 	for _, task := range jsontasks.Tasks {
 		// Use regex to remove characters that are not allowed in hostnames
 		re := regexp.MustCompile("[^0-9a-z-]")
@@ -167,19 +167,20 @@ func syncApps(jsontasks *MarathonTasks, jsonapps *MarathonApps) {
 				continue
 			}
 		}
-		if s, ok := apps.Apps[appid]; ok {
+		if s, ok := appstmp[appid]; ok {
 			s.Lb.UpsertServer(testutils.ParseURI("http://" + task.Host + ":" + strconv.FormatInt(task.Ports[0], 10)))
 			s.Tasks = append(s.Tasks, task.Host+":"+strconv.FormatInt(task.Ports[0], 10))
-			apps.Apps[appid] = s
+			appstmp[appid] = s
 		} else {
 			var s = App{}
 			s.Fwd, _ = forward.New(forward.PassHostHeader(true))
 			s.Lb, _ = roundrobin.New(s.Fwd)
 			s.Lb.UpsertServer(testutils.ParseURI("http://" + task.Host + ":" + strconv.FormatInt(task.Ports[0], 10)))
 			s.Tasks = []string{task.Host + ":" + strconv.FormatInt(task.Ports[0], 10)}
-			apps.Apps[appid] = s
+			appstmp[appid] = s
 		}
 	}
+	apps.Apps = appstmp
 }
 
 func reload() error {
