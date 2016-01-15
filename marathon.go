@@ -132,9 +132,9 @@ func fetchApps(jsontasks *MarathonTasks, jsonapps *MarathonApps) error {
 }
 
 func syncApps(jsontasks *MarathonTasks, jsonapps *MarathonApps) {
-	apps = Apps{Apps: make(map[string]App)}
 	apps.Lock()
 	defer apps.Unlock()
+	apps.Apps = make(map[string]App)
 	for _, task := range jsontasks.Tasks {
 		// Use regex to remove characters that are not allowed in hostnames
 		re := regexp.MustCompile("[^0-9a-z-]")

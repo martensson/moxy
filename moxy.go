@@ -48,6 +48,8 @@ func moxy_proxy(w http.ResponseWriter, r *http.Request) {
 	if config.Xproxy != "" {
 		w.Header().Add("X-Proxy", config.Xproxy)
 	}
+	apps.RLock()
+	defer apps.RUnlock()
 	if s, ok := apps.Apps[app]; ok {
 		if config.Statsd != "" {
 			go func(app string) {
