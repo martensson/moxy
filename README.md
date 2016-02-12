@@ -2,6 +2,8 @@
 
 moxy is a HTTP Reverse Proxy and Load Balancer that automatically configures itself for microservices deployed on [Apache Mesos](http://mesos.apache.org) and [Marathon](https://mesosphere.github.io/marathon/). It is inspired by [Vulcand](https://github.com/mailgun/vulcand) and moxy does in fact use the same proxy library written by the nice people at Mailgun.
 
+**UPDATE (2016/02/12): moxy development is being greatly reduced in favor of [nixy](https://github.com/martensson/nixy) which replaces moxy completely**
+
 Features:
 
 * Reverse proxy and load balancer for your microservices running inside Mesos and Marathon
